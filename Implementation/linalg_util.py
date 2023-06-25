@@ -1,29 +1,30 @@
 import numpy as np
-from scipy.linalg import cholesky, LinAlgError
+# from scipy.linalg import cholesky, LinAlgError
+from scipy import linalg
 
 
-def custom_cholesky(matrix, max_tries=5):
+def cholesky(matrix, max_tries=5):
     matrix = np.ascontiguousarray(matrix)
     diag_matrix = np.diag(matrix)
     jitter = diag_matrix.mean() * 1e-6
     num_tries = 0
     
     try:
-        L = cholesky(matrix, lower=True)
+        L = linalg.cholesky(matrix, lower=True)
         return L
-    except LinAlgError:
+    except linalg.LinAlgError:
         num_tries += 1
         
     while num_tries <= max_tries and np.isfinite(jitter):
         try:
-            L = cholesky(matrix + np.eye(matrix.shape[0]) * jitter,
+            L = linalg.cholesky(matrix + np.eye(matrix.shape[0]) * jitter,
                         lower=True)
             return L
-        except LinAlgError:
+        except linalg.LinAlgError:
             jitter *= 10
             num_tries += 1
             
-    raise LinAlgError("Matrix is not positive definite, even with jitter.")
+    raise linalg.LinAlgError("Matrix is not positive definite, even with jitter.")
 
     
     

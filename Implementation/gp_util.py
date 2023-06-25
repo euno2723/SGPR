@@ -1,3 +1,7 @@
+import numpy as np
+
+
+# radial baisis kernel
 class RBF:
     def __init__(self, variance=1., lengthscale=0.1):
         self.variance=variance
@@ -19,3 +23,6 @@ class RBF:
             r2 = -2.*np.dot(X, X2.T) + (X1sq[:,None] + X2sq[None,:])
             r2 = np.clip(r2, 0, np.inf)
             return np.sqrt(r2)
+
+
+# Samplilng from a multivariate normal distribution
