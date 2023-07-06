@@ -50,15 +50,14 @@ class Posterior:
     @property
     def mean(self): # posterior mean
         if self._mean is None:
-            self._mean = self._K @ self.woodbury_vector
+            self._mean = self._K @ self._woodbury_vector
         return self._mean
 
     @property
     def covariance(self): # posterior covariance
         if self._covariance is None:
-            self._covariance = self._K - self._K @ self.woodbury_inv @ self._K
+            self._covariance = self._K - self._K @ self._woodbury_inv @ self._K
         return self._covariance
-    
     
     @property
     def K_chol(self):
@@ -75,6 +74,21 @@ class Posterior:
         if len(mu.shape) == 1:
             mu = mu.reshape(-1, 1)
         Kxx = kern.K(Xnew)
-        var = Kxx - Kx.T @ woodbury_inv @ Kx
+        cov = Kxx - Kx.T @ woodbury_inv @ Kx
 
-        return mu, var
+        return mu, cov
+    
+
+
+# 実験用データ作成
+import pods
+
+def make_data():
+    data = pods.datasets.olympic_100m_men()
+    X, Y = data["X"], data["Y"]
+    X_min, X_max = X[:,0].min(), X[:,0].max()
+    X_min_max_diff = X_max - X_min
+    X_pred = np.linspace(X[:,0].min() - X_min_max_diff / 10,
+                        X[:,0].max() + X_min_max_diff / 10,
+                        500).reshape(-1,1)
+    return X, Y, X_pred

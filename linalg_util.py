@@ -26,7 +26,18 @@ def customized_cholesky(matrix, max_tries=5):
             
     raise linalg.LinAlgError("Matrix is not positive definite, even with jitter.")
 
-    
+
+def symmetrify_matrix(A, upper=False):
+    triu = np.triu_indices_from(A,k=1)
+    if upper:
+        A.T[triu] = A[triu]
+    else:
+        A[triu] = A.T[triu]
+    return A
+
+
+
+# 実験用データ作成
 def generate_pd_matrix(size=None):
     if size is None:
         size = 20
@@ -46,14 +57,3 @@ def generate_non_pd_matrix(size=None):
     return A_corrupt
 
 
-def symmetrify_matrix(A, upper=False):
-    triu = np.triu_indices_from(A,k=1)
-    if upper:
-        A.T[triu] = A[triu]
-    else:
-        A[triu] = A.T[triu]
-    return A
-
-
-def test():
-    print("hello")
