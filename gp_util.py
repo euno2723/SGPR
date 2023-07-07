@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg.lapack import dpotri
 from linalg_util import *
+import matplotlib.pyplot as plt
 
 
 # radial baisis kernel
@@ -36,8 +37,6 @@ class Posterior:
         self._woodbury_vector = woodbury_vector
         self._woodbury_inv = woodbury_inv
         
-        self._mean = None
-        self._covariance = None
 
     @property
     def woodbury_inv(self):
@@ -48,36 +47,44 @@ class Posterior:
         return self._woodbury_inv
     
     @property
-    def mean(self): # posterior mean
-        if self._mean is None:
-            self._mean = self._K @ self._woodbury_vector
-        return self._mean
-
-    @property
-    def covariance(self): # posterior covariance
-        if self._covariance is None:
-            self._covariance = self._K - self._K @ self._woodbury_inv @ self._K
-        return self._covariance
-    
-    @property
     def K_chol(self):
         if self._K_chol is None:
             self._K_chol = customized_cholesky(self._K)
         return self._K_chol
 
-    def _raw_predict(self, kern, Xnew, pred_var):
+    def _raw_predict(self, kernel, X_new, pred_var):
         woodbury_vector = self.woodbury_vector
         woodbury_inv = self.woodbury_inv
 
-        Kx = kern.K(pred_var, Xnew)
+        Kx = kernel.K(pred_var, X_new)
         mu = Kx.T @ woodbury_vector
         if len(mu.shape) == 1:
             mu = mu.reshape(-1, 1)
-        Kxx = kern.K(Xnew)
+        Kxx = kernel.K(X_new)
         cov = Kxx - Kx.T @ woodbury_inv @ Kx
 
         return mu, cov
+
+    def sampling(self, kernel, X_new, pred_var, size=None):
+        mu, cov = self._raw_predict(kernel, X_new, pred_var)
+        samples = np.random.multivariate_normal(mu, cov, size=size)
+        return mu, cov, samples
+        
     
+# 可視化
+def plot_gp(mu, cov, X, X_train=None, Y_train=None, samples=[]):
+    X = X.ravel()
+    mu = mu.ravel()
+    uncertainty = 1.96 * np.sqrt(np.diag(cov))
+    
+    plt.fill_between(X, mu + uncertainty, mu - uncertainty, alpha=0.1)
+    plt.plot(X, mu, label='Mean')
+    for i, sample in enumerate(samples):
+        plt.plot(X, sample, lw=1, ls='--', label=f'Sample {i+1}')
+    if X_train is not None:
+        plt.plot(X_train, Y_train, 'rx')
+    plt.legend()
+
 
 
 # 実験用データ作成
