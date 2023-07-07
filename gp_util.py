@@ -53,7 +53,7 @@ class Posterior:
         return self._K_chol
 
     def _raw_predict(self, kernel, X_new, pred_var):
-        woodbury_vector = self.woodbury_vector
+        woodbury_vector = self._woodbury_vector
         woodbury_inv = self.woodbury_inv
 
         Kx = kernel.K(pred_var, X_new)
@@ -65,9 +65,9 @@ class Posterior:
 
         return mu, cov
 
-    def sampling(self, kernel, X_new, pred_var, size=None):
+    def sampling(self, kernel, X_new, pred_var, size=1):
         mu, cov = self._raw_predict(kernel, X_new, pred_var)
-        samples = np.random.multivariate_normal(mu, cov, size=size)
+        samples = np.random.multivariate_normal(mu.ravel(), cov, size=size)
         return mu, cov, samples
         
     
