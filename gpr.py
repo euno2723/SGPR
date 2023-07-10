@@ -1,10 +1,9 @@
 from scipy.linalg import solve_triangular
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 
 from linalg_util import customized_cholesky
-from gp_util import RBF, Posterior, plot_gp, make_data
+from gp_util import RBF, Posterior, plot_gp
 
 
 
@@ -62,21 +61,5 @@ class GPR:
         plot_gp(mu, cov, self._X, X_train=self.X_train, Y_train=self.y_train, samples=samples)
         plt.show()
 
-
-
-
-def main():
-    X, Y, X_pred = make_data()
-
-    k = RBF(variance=1., lengthscale=10.)
-    m = GPR(X, Y, kernel=k)
-    # m.plot_sampled_prior(size=10)
-    # m.plot_sampled_prior()
-    m.plot_sampled_posterior()
-
-
-
-if __name__ == '__main__':
-    main()
 
 

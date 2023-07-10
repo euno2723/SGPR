@@ -90,7 +90,7 @@ def plot_gp(mu, cov, X, X_train=None, Y_train=None, samples=[]):
 # 実験用データ作成
 import pods
 
-def make_data():
+def make_data(inducing_num=10):
     data = pods.datasets.olympic_100m_men()
     X, Y = data["X"], data["Y"]
     X_min, X_max = X[:,0].min(), X[:,0].max()
@@ -98,4 +98,6 @@ def make_data():
     X_pred = np.linspace(X[:,0].min() - X_min_max_diff / 10,
                         X[:,0].max() + X_min_max_diff / 10,
                         500).reshape(-1,1)
-    return X, Y, X_pred
+    
+    Z = np.linspace(X_min, X_max, inducing_num).reshape(-1,1)
+    return X, Y, X_pred, Z
